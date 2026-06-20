@@ -33,18 +33,22 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> loadBhajans() async {
+  final repository = BhajanRepository();
 
-    final repository = BhajanRepository();
+  allBhajans =
+      await repository.getAllBhajans();
 
-allBhajans =
-    await repository.getAllBhajans();
+  debugPrint(
+      "Loaded : ${allBhajans.length}");
 
-    filteredBhajans = allBhajans;
+  filteredBhajans = allBhajans;
 
+  if (mounted) {
     setState(() {
       loading = false;
     });
   }
+}
 
   void search(String value) {
 
