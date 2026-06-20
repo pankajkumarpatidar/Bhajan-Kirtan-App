@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../core/services/favorite_service.dart';
 import '../../models/bhajan_model.dart';
+import '../../widgets/favorite_button.dart';
 import '../audio/audio_player_screen.dart';
 
 class LyricsScreen extends StatefulWidget {
@@ -18,160 +18,65 @@ class LyricsScreen extends StatefulWidget {
 }
 
 class _LyricsScreenState extends State<LyricsScreen> {
-
   double fontSize = 20;
-
-  bool isFavorite = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    isFavorite = FavoriteService.isFavorite(
-      widget.bhajan.id,
-    );
-  }
-
-  Future<void> toggleFavorite() async {
-
-    await FavoriteService.toggleFavorite(
-      widget.bhajan.id,
-    );
-
-    setState(() {
-
-      isFavorite = FavoriteService.isFavorite(
-        widget.bhajan.id,
-      );
-
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-
-      SnackBar(
-
-        duration: const Duration(seconds: 1),
-
-        content: Text(
-
-          isFavorite
-              ? "❤️ Favorites में जोड़ दिया"
-              : "🤍 Favorites से हटा दिया",
-
-        ),
-
-      ),
-
-    );
-
-  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       backgroundColor: const Color(0xffF8F8F8),
 
       appBar: AppBar(
-
         centerTitle: true,
-
         elevation: 0,
 
         title: Text(
-
           widget.bhajan.title,
-
           style: GoogleFonts.poppins(
-
             fontWeight: FontWeight.w600,
-
           ),
-
         ),
 
         actions: [
 
-          IconButton(
-
-            onPressed: toggleFavorite,
-
-            icon: Icon(
-
-              isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border,
-
-              color: Colors.red,
-
-            ),
-
+          FavoriteButton(
+            bhajanId: widget.bhajan.id,
           ),
 
           IconButton(
-
             onPressed: () {
-
               // TODO Share
-
             },
-
-            icon: const Icon(
-              Icons.share,
-            ),
-
+            icon: const Icon(Icons.share),
           ),
 
         ],
-
       ),
-
-      floatingActionButton:
-          FloatingActionButton.extended(
-
+floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(
           Icons.play_arrow,
         ),
-
-        label: const Text(
-          "Play",
-        ),
-
+        label: const Text("Play"),
         backgroundColor: Colors.orange,
-
         onPressed: () {
-
           Navigator.push(
-
             context,
-
             MaterialPageRoute(
-
-              builder: (_) =>
-                  AudioPlayerScreen(
-
+              builder: (_) => AudioPlayerScreen(
                 bhajan: widget.bhajan,
-
               ),
-
             ),
-
           );
-
         },
-
       ),
 
       body: Padding(
-
         padding: const EdgeInsets.all(18),
-
         child: Column(
-
           children: [
-Row(
+
+            Row(
               children: [
+
                 const Text(
                   "Font Size",
                   style: TextStyle(
@@ -214,8 +119,7 @@ Row(
             ),
 
             const Divider(),
-
-            Expanded(
+Expanded(
               child: SingleChildScrollView(
                 child: SelectableText(
                   widget.bhajan.lyrics.isEmpty
@@ -229,9 +133,10 @@ Row(
                 ),
               ),
             ),
+
           ],
         ),
       ),
-    );
+);
   }
 }
