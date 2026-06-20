@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../models/bhajan_model.dart';
 import '../../repository/bhajan_repository.dart';
+import '../../widgets/favorite_button.dart';
 import '../lyrics/lyrics_screen.dart';
 
 class CategoryScreen extends StatelessWidget {
@@ -35,7 +36,6 @@ class CategoryScreen extends StatelessWidget {
       body: StreamBuilder<List<BhajanModel>>(
         stream: BhajanRepository().getBhajans(categoryId),
         builder: (context, snapshot) {
-
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
             return const Center(
@@ -45,9 +45,7 @@ class CategoryScreen extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(
-                snapshot.error.toString(),
-              ),
+              child: Text(snapshot.error.toString()),
             );
           }
 
@@ -68,7 +66,6 @@ class CategoryScreen extends StatelessWidget {
             ),
             itemCount: bhajans.length,
             itemBuilder: (context, index) {
-
               final bhajan = bhajans[index];
 return Card(
                 elevation: 2,
@@ -115,12 +112,9 @@ return Card(
                               Text(
                                 bhajan.title,
                                 maxLines: 2,
-                                overflow:
-                                    TextOverflow.ellipsis,
-                                style:
-                                    GoogleFonts.poppins(
-                                  fontWeight:
-                                      FontWeight.w600,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
@@ -129,8 +123,7 @@ return Card(
 
                               Text(
                                 categoryName,
-                                style:
-                                    GoogleFonts.poppins(
+                                style: GoogleFonts.poppins(
                                   color: Colors.grey,
                                   fontSize: 13,
                                 ),
@@ -140,7 +133,9 @@ return Card(
                           ),
                         ),
 
-                        const SizedBox(width: 10),
+                        FavoriteButton(
+                          bhajanId: bhajan.id,
+                        ),
 
                         const Icon(
                           Icons.arrow_forward_ios_rounded,
@@ -153,7 +148,7 @@ return Card(
                   ),
                 ),
               );
-},
+            },
           );
         },
       ),

@@ -4,26 +4,48 @@ class FavoriteService {
   static const String boxName = "favorites";
 
   static Future<void> init() async {
-    await Hive.openBox(boxName);
+    if (!Hive.isBoxOpen(boxName)) {
+      await Hive.openBox<bool>(boxName);
+    }
   }
 
-  static Box get _box => Hive.box(boxName);
+  static Box<bool> get _box =>
+      Hive.box<bool>(boxName);
 
+  /// Check Favorite
   static bool isFavorite(String bhajanId) {
-    return _box.get(bhajanId, defaultValue: false);
+    return _box.get(
+          bhajanId,
+          defaultValue: false,
+        ) ??
+        false;
   }
 
-  static Future<void> toggleFavorite(String bhajanId) async {
-    final fav = isFavorite(bhajanId);
-
-    if (fav) {
+  /// Add / Remove Favorite
+  static Future<void> toggleFavorite(
+    String bhajanId,
+  ) async {
+    if (isFavorite(bhajanId)) {
       await _box.delete(bhajanId);
     } else {
       await _box.put(bhajanId, true);
     }
   }
 
+  /// All Favorite IDs
   static List<String> getAllFavorites() {
-    return _box.keys.cast<String>().toList();
+    return _box.keys
+        .map((e) => e.toString())
+        .toList();
+  }
+
+  /// Total Favorites
+  static int getCount() {
+    return _box.length;
+  }
+
+  /// Remove All Favorites
+  static Future<void> clearFavorites() async {
+    await _box.clear();
   }
 }

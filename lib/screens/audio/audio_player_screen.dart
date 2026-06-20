@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../models/bhajan_model.dart';
+import '../../widgets/favorite_button.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final BhajanModel bhajan;
@@ -35,7 +36,6 @@ class _AudioPlayerScreenState
     _loadAudio();
 
     _player.playerStateStream.listen((state) {
-
       if (!mounted) return;
 
       setState(() {
@@ -44,7 +44,6 @@ class _AudioPlayerScreenState
 
       if (state.processingState ==
           ProcessingState.completed) {
-
         _player.seek(Duration.zero);
 
         setState(() {
@@ -54,7 +53,6 @@ class _AudioPlayerScreenState
     });
 
     _player.durationStream.listen((d) {
-
       if (!mounted) return;
 
       setState(() {
@@ -63,7 +61,6 @@ class _AudioPlayerScreenState
     });
 
     _player.positionStream.listen((p) {
-
       if (!mounted) return;
 
       setState(() {
@@ -73,82 +70,67 @@ class _AudioPlayerScreenState
   }
 
   Future<void> _loadAudio() async {
-
     try {
-
       await _player.setUrl(
         widget.bhajan.audioUrl,
       );
-
     } catch (e) {
-
       debugPrint(e.toString());
-
     }
 
     if (mounted) {
-
       setState(() {
-
         isLoading = false;
-
       });
-
     }
-
   }
 
   String formatTime(Duration d) {
-
-    final minutes =
-        d.inMinutes.remainder(60);
-
-    final seconds =
-        d.inSeconds.remainder(60);
+    final minutes = d.inMinutes.remainder(60);
+    final seconds = d.inSeconds.remainder(60);
 
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
-
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       backgroundColor: const Color(0xffF8F8F8),
 
       appBar: AppBar(
-
         centerTitle: true,
 
         title: Text(
-
           widget.bhajan.title,
-
           maxLines: 1,
-
           overflow: TextOverflow.ellipsis,
-
           style: GoogleFonts.poppins(
-
             fontWeight: FontWeight.w600,
-
           ),
-
         ),
 
+        actions: [
+
+          FavoriteButton(
+            bhajanId: widget.bhajan.id,
+          ),
+
+          IconButton(
+            onPressed: () {
+              // TODO Share
+            },
+            icon: const Icon(Icons.share),
+          ),
+
+        ],
       ),
-
-      body: SafeArea(
-
+body: SafeArea(
         child: SingleChildScrollView(
-
           padding: const EdgeInsets.all(20),
-
           child: Column(
-
             children: [
-const SizedBox(height: 20),
+
+              const SizedBox(height: 20),
 
               Container(
                 height: 260,
@@ -179,26 +161,38 @@ const SizedBox(height: 20),
 
               if (isLoading)
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 20,
+                  ),
                   child: CircularProgressIndicator(),
                 )
               else ...[
 
                 Slider(
-                  value: position.inSeconds.toDouble().clamp(
-                    0,
-                    duration.inSeconds.toDouble() == 0
-                        ? 1
-                        : duration.inSeconds.toDouble(),
-                  ),
+                  value: position.inSeconds
+                      .toDouble()
+                      .clamp(
+                        0,
+                        duration.inSeconds
+                                    .toDouble() ==
+                                0
+                            ? 1
+                            : duration.inSeconds
+                                .toDouble(),
+                      ),
                   min: 0,
-                  max: duration.inSeconds.toDouble() == 0
+                  max: duration.inSeconds
+                              .toDouble() ==
+                          0
                       ? 1
-                      : duration.inSeconds.toDouble(),
+                      : duration.inSeconds
+                          .toDouble(),
                   activeColor: Colors.orange,
                   onChanged: (value) async {
                     await _player.seek(
-                      Duration(seconds: value.toInt()),
+                      Duration(
+                        seconds: value.toInt(),
+                      ),
                     );
                   },
                 ),
@@ -210,12 +204,14 @@ const SizedBox(height: 20),
 
                     Text(
                       formatTime(position),
-                      style: GoogleFonts.poppins(),
+                      style:
+                          GoogleFonts.poppins(),
                     ),
 
                     Text(
                       formatTime(duration),
-                      style: GoogleFonts.poppins(),
+                      style:
+                          GoogleFonts.poppins(),
                     ),
 
                   ],
@@ -238,18 +234,15 @@ const SizedBox(height: 20),
 
                     FloatingActionButton(
                       heroTag: "play",
-                      backgroundColor: Colors.orange,
+                      backgroundColor:
+                          Colors.orange,
                       elevation: 5,
                       onPressed: () async {
 
                         if (isPlaying) {
-
                           await _player.pause();
-
                         } else {
-
                           await _player.play();
-
                         }
 
                       },
@@ -279,27 +272,31 @@ const SizedBox(height: 20),
                       MainAxisAlignment.spaceEvenly,
                   children: [
 
+                    FavoriteButton(
+                      bhajanId: widget.bhajan.id,
+                    ),
+
                     IconButton(
                       onPressed: () {},
                       icon: const Icon(
-                        Icons.favorite_border,
-                        color: Colors.red,
+                        Icons.repeat,
                       ),
                     ),
 
                     IconButton(
                       onPressed: () {},
-                      icon: const Icon(Icons.repeat),
+                      icon: const Icon(
+                        Icons.shuffle,
+                      ),
                     ),
 
                     IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.shuffle),
-                    ),
-
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.share),
+                      onPressed: () {
+                        // TODO Download
+                      },
+                      icon: const Icon(
+                        Icons.download,
+                      ),
                     ),
 
                   ],

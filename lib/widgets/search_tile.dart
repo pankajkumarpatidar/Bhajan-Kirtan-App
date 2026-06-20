@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/bhajan_model.dart';
+import 'favorite_button.dart';
 
 class SearchTile extends StatelessWidget {
   final BhajanModel bhajan;
@@ -55,6 +56,7 @@ class SearchTile extends StatelessWidget {
                   },
                 ),
         ),
+
         title: Text(
           bhajan.title,
           maxLines: 2,
@@ -64,6 +66,7 @@ class SearchTile extends StatelessWidget {
             fontSize: 15,
           ),
         ),
+
         subtitle: Text(
           bhajan.categoryId,
           style: GoogleFonts.poppins(
@@ -71,9 +74,22 @@ class SearchTile extends StatelessWidget {
             fontSize: 12,
           ),
         ),
-        trailing: const Icon(
-          Icons.chevron_right,
+
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            FavoriteButton(
+              bhajanId: bhajan.id,
+            ),
+
+            const Icon(
+              Icons.chevron_right,
+            ),
+
+          ],
         ),
+
         onTap: onTap,
       ),
     );
