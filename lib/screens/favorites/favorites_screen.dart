@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/favorite_service.dart';
 import '../../models/bhajan_model.dart';
 import '../../repository/bhajan_repository.dart';
+import '../../widgets/search_tile.dart';
 import '../lyrics/lyrics_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -20,22 +21,27 @@ class _FavoritesScreenState
   final BhajanRepository repository =
       BhajanRepository();
 
+  final TextEditingController
+      searchController =
+      TextEditingController();
+
   List<BhajanModel> favoriteBhajans = [];
+
+  List<BhajanModel> filteredBhajans = [];
 
   bool loading = true;
 
   @override
   void initState() {
     super.initState();
-
     loadFavorites();
   }
 
   Future<void> loadFavorites() async {
 
-    loading = true;
-
-    setState(() {});
+    setState(() {
+      loading = true;
+    });
 
     final ids =
         FavoriteService.getAllFavorites();
@@ -50,15 +56,58 @@ class _FavoritesScreenState
         )
         .toList();
 
-    loading = false;
+    filteredBhajans =
+        List.from(favoriteBhajans);
 
-    setState(() {});
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  void search(String value) {
+
+    if (value.trim().isEmpty) {
+
+      setState(() {
+        filteredBhajans =
+            List.from(favoriteBhajans);
+      });
+
+      return;
+    }
+
+    final text =
+        value.toLowerCase().trim();
+
+    setState(() {
+
+      filteredBhajans =
+          favoriteBhajans.where((bhajan) {
+
+        return bhajan.title
+                .toLowerCase()
+                .contains(text) ||
+            bhajan.lyrics
+                .toLowerCase()
+                .contains(text) ||
+            bhajan.categoryId
+                .toLowerCase()
+                .contains(text);
+
+      }).toList();
+
+    });
   }
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
+
+      backgroundColor:
+          const Color(0xffF7F8FC),
 
       appBar: AppBar(
         centerTitle: true,
@@ -69,120 +118,247 @@ class _FavoritesScreenState
           ),
         ),
       ),
-body: loading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : favoriteBhajans.isEmpty
-              ? Center(
+
+      body: RefreshIndicator(
+
+        onRefresh: loadFavorites,
+
+        child: Column(
+
+          children: [
+
+            Padding(
+              padding:
+                  const EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                10,
+              ),
+              child: TextField(
+                controller:
+                    searchController,
+                onChanged: search,
+                decoration:
+                    InputDecoration(
+                  hintText:
+                      "Favorite Bhajan खोजें...",
+
+                  prefixIcon:
+                      const Icon(
+                    Icons.search,
+                  ),
+
+                  suffixIcon:
+                      searchController
+                              .text
+                              .isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                searchController
+                                    .clear();
+
+                                search("");
+                              },
+                              icon:
+                                  const Icon(
+                                Icons.clear,
+                              ),
+                            )
+                          : null,
+
+                  filled: true,
+
+                  fillColor:
+                      Colors.white,
+
+                  border:
+                      OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius
+                            .circular(
+                      16,
+                    ),
+                    borderSide:
+                        BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+
+            if (loading)
+
+              const Expanded(
+                child: Center(
+                  child:
+                      CircularProgressIndicator(),
+                ),
+              )
+
+            else if (filteredBhajans
+                .isEmpty)
+
+              Expanded(
+                child: Center(
                   child: Column(
                     mainAxisAlignment:
-                        MainAxisAlignment.center,
+                        MainAxisAlignment
+                            .center,
                     children: [
 
                       const Icon(
-                        Icons.favorite_border,
+                        Icons
+                            .favorite_border,
+                        color:
+                            Colors.red,
                         size: 90,
-                        color: Colors.red,
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(
+                        height: 20,
+                      ),
 
                       Text(
                         "No Favorite Bhajans",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
+                        style:
+                            GoogleFonts
+                                .poppins(
+                          fontSize: 21,
                           fontWeight:
-                              FontWeight.w600,
+                              FontWeight
+                                  .bold,
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(
+                        height: 8,
+                      ),
 
                       Text(
                         "अपने पसंदीदा भजन\nHeart दबाकर जोड़ें।",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey,
+                        textAlign:
+                            TextAlign
+                                .center,
+                        style:
+                            GoogleFonts
+                                .poppins(
+                          color:
+                              Colors.grey,
                         ),
                       ),
                     ],
                   ),
-                )
-              : ListView.builder(
+                ),
+              )
+
+            else
+
+              Expanded(
+                child:
+                    ListView.builder(
+
+                  physics:
+                      const AlwaysScrollableScrollPhysics(),
+
                   padding:
-                      const EdgeInsets.all(16),
+                      const EdgeInsets
+                          .all(16),
 
                   itemCount:
-                      favoriteBhajans.length,
-
-                  itemBuilder:
-                      (context, index) {
-
+                      filteredBhajans
+                          .length,
+itemBuilder: (context, index) {
                     final bhajan =
-                        favoriteBhajans[index];
+                        filteredBhajans[index];
 
-                    return Card(
-                      margin:
-                          const EdgeInsets.only(
-                        bottom: 14,
+                    return Dismissible(
+                      key: Key(bhajan.id),
+                      direction:
+                          DismissDirection.endToStart,
+
+                      background: Container(
+                        margin: const EdgeInsets.only(
+                          bottom: 14,
+                        ),
+                        padding: const EdgeInsets.only(
+                          right: 24,
+                        ),
+                        alignment:
+                            Alignment.centerRight,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius:
+                              BorderRadius.circular(18),
+                        ),
+                        child: const Icon(
+                          Icons.delete_rounded,
+                          color: Colors.white,
+                          size: 30,
+                        ),
                       ),
 
-                      shape:
-                          RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(
-                                18),
-                      ),
+                      onDismissed: (_) async {
 
-                      child: ListTile(
+                        await FavoriteService
+                            .toggleFavorite(
+                          bhajan.id,
+                        );
 
-                        leading: CircleAvatar(
-                          backgroundColor:
-                              Colors.orange
-                                  .shade100,
+                        await loadFavorites();
 
-                          child: const Icon(
-                            Icons.music_note,
-                            color:
-                                Colors.deepOrange,
-                          ),
-                        ),
+                        if (!context.mounted) return;
 
-                        title: Text(
-                          bhajan.title,
-                          style:
-                              GoogleFonts.poppins(
-                            fontWeight:
-                                FontWeight.w600,
-                          ),
-                        ),
-
-                        subtitle: Text(
-                          bhajan.categoryId,
-                        ),
-
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 18,
-                        ),
-
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  LyricsScreen(
-                                bhajan: bhajan,
-                              ),
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              "${bhajan.title} Favorites से हटा दिया",
                             ),
-                          );
-                        },
+                            duration:
+                                const Duration(
+                              seconds: 2,
+                            ),
+                          ),
+                        );
+                      },
+
+                      child: Card(
+                        elevation: 2,
+                        margin:
+                            const EdgeInsets.only(
+                          bottom: 14,
+                        ),
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                                  18),
+                        ),
+                        child: SearchTile(
+                          bhajan: bhajan,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    LyricsScreen(
+                                  bhajan: bhajan,
+                                ),
+                              ),
+                            ).then((_) {
+                              loadFavorites();
+                            });
+                          },
+                        ),
                       ),
                     );
                   },
                 ),
-);
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -197,5 +373,11 @@ body: loading
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }
