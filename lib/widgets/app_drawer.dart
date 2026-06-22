@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../screens/favorites/favorites_screen.dart';
+import '../screens/recent/recently_played_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -114,13 +115,23 @@ class AppDrawer extends StatelessWidget {
                     },
                   ),
 
-                  menuTile(
-                    icon: Icons.history,
-                    title: "Recently Played",
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
+                 menuTile(
+  icon: Icons.history,
+  title: "Recently Played",
+  onTap: () {
+
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            const RecentlyPlayedScreen(),
+      ),
+    );
+
+  },
+),
 
                   menuTile(
                     icon: Icons.download,

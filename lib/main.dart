@@ -5,10 +5,13 @@ import 'package:provider/provider.dart';
 
 import 'core/services/bhajan_cache_service.dart';
 import 'core/services/favorite_service.dart';
+import 'core/services/recent_service.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'providers/category_provider.dart';
 import 'screens/home/home_screen.dart';
+import 'core/services/playlist_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -18,7 +21,9 @@ Future<void> main() async {
   // Local Storage
   await FavoriteService.init();
   await BhajanCacheService.init();
-
+  await RecentService.init();
+  await PlaylistService.init();
+  
   // Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -35,6 +40,7 @@ Future<void> main() async {
     ),
   );
 }
+
 class KirtanApp extends StatelessWidget {
   const KirtanApp({super.key});
 
@@ -47,10 +53,10 @@ class KirtanApp extends StatelessWidget {
 
       theme: AppTheme.lightTheme,
 
+      themeMode: ThemeMode.system,
+
       home: const HomeScreen(),
 
-      // Future Ready
-      themeMode: ThemeMode.system,
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(

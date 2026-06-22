@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../core/services/recent_service.dart';
 import '../../models/bhajan_model.dart';
 import '../../widgets/favorite_button.dart';
+import '../../widgets/add_to_playlist_sheet.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final BhajanModel bhajan;
@@ -36,6 +38,7 @@ class _AudioPlayerScreenState
     _loadAudio();
 
     _player.playerStateStream.listen((state) {
+
       if (!mounted) return;
 
       setState(() {
@@ -44,131 +47,254 @@ class _AudioPlayerScreenState
 
       if (state.processingState ==
           ProcessingState.completed) {
+
         _player.seek(Duration.zero);
 
         setState(() {
           isPlaying = false;
         });
+
       }
     });
 
     _player.durationStream.listen((d) {
+
       if (!mounted) return;
 
       setState(() {
         duration = d ?? Duration.zero;
       });
+
     });
 
     _player.positionStream.listen((p) {
+
       if (!mounted) return;
 
       setState(() {
         position = p;
       });
+
     });
   }
 
   Future<void> _loadAudio() async {
+
     try {
+
       await _player.setUrl(
         widget.bhajan.audioUrl,
       );
+
+      await RecentService.addRecent(
+        widget.bhajan.id,
+      );
+
     } catch (e) {
+
       debugPrint(e.toString());
+
+      if (mounted) {
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Audio Load Failed",
+            ),
+          ),
+        );
+
+      }
+
     }
 
     if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
 
-  String formatTime(Duration d) {
-    final minutes = d.inMinutes.remainder(60);
-    final seconds = d.inSeconds.remainder(60);
+      setState(() {
+
+        isLoading = false;
+
+      });
+
+    }
+
+  }
+String formatTime(Duration d) {
+
+    final hours = d.inHours;
+
+    final minutes =
+        d.inMinutes.remainder(60);
+
+    final seconds =
+        d.inSeconds.remainder(60);
+
+    if (hours > 0) {
+
+      return "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+
+    }
 
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
+
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor: const Color(0xffF8F8F8),
 
       appBar: AppBar(
+
         centerTitle: true,
 
         title: Text(
+
           widget.bhajan.title,
+
           maxLines: 1,
+
           overflow: TextOverflow.ellipsis,
+
           style: GoogleFonts.poppins(
+
             fontWeight: FontWeight.w600,
+
           ),
+
         ),
 
         actions: [
 
-          FavoriteButton(
-            bhajanId: widget.bhajan.id,
+  FavoriteButton(
+    bhajanId: widget.bhajan.id,
+  ),
+
+  IconButton(
+    icon: const Icon(
+      Icons.playlist_add,
+    ),
+    onPressed: () {
+
+      showModalBottomSheet(
+
+        context: context,
+
+        isScrollControlled: true,
+
+        shape: const RoundedRectangleBorder(
+
+          borderRadius: BorderRadius.vertical(
+
+            top: Radius.circular(25),
+
           ),
 
-          IconButton(
-            onPressed: () {
-              // TODO Share
-            },
-            icon: const Icon(Icons.share),
-          ),
+        ),
 
-        ],
+        builder: (_) => AddToPlaylistSheet(
+
+          bhajanId: widget.bhajan.id,
+
+        ),
+
+      );
+
+    },
+  ),
+
+  IconButton(
+    onPressed: () {
+      // TODO Share
+    },
+    icon: const Icon(
+      Icons.share,
+    ),
+  ),
+
+],
+
       ),
-body: SafeArea(
+
+      body: SafeArea(
+
         child: SingleChildScrollView(
+
           padding: const EdgeInsets.all(20),
+
           child: Column(
+
             children: [
 
               const SizedBox(height: 20),
 
               Container(
+
                 height: 260,
+
                 width: 260,
+
                 decoration: BoxDecoration(
+
                   color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(24),
+
+                  borderRadius:
+                      BorderRadius.circular(24),
+
                 ),
+
                 child: const Icon(
+
                   Icons.music_note,
+
                   size: 120,
+
                   color: Colors.deepOrange,
+
                 ),
+
               ),
 
               const SizedBox(height: 30),
 
               Text(
+
                 widget.bhajan.title,
+
                 textAlign: TextAlign.center,
+
                 style: GoogleFonts.poppins(
+
                   fontSize: 22,
+
                   fontWeight: FontWeight.bold,
+
                 ),
+
               ),
 
               const SizedBox(height: 30),
 
               if (isLoading)
+
                 const Padding(
+
                   padding: EdgeInsets.symmetric(
                     vertical: 20,
                   ),
-                  child: CircularProgressIndicator(),
+
+                  child:
+                      CircularProgressIndicator(),
+
                 )
+
               else ...[
 
                 Slider(
+
                   value: position.inSeconds
                       .toDouble()
                       .clamp(
@@ -180,26 +306,37 @@ body: SafeArea(
                             : duration.inSeconds
                                 .toDouble(),
                       ),
+
                   min: 0,
+
                   max: duration.inSeconds
                               .toDouble() ==
                           0
                       ? 1
                       : duration.inSeconds
                           .toDouble(),
+
                   activeColor: Colors.orange,
+
                   onChanged: (value) async {
+
                     await _player.seek(
+
                       Duration(
                         seconds: value.toInt(),
                       ),
+
                     );
+
                   },
+
                 ),
 
                 Row(
+
                   mainAxisAlignment:
                       MainAxisAlignment.spaceBetween,
+
                   children: [
 
                     Text(
@@ -215,17 +352,19 @@ body: SafeArea(
                     ),
 
                   ],
+
                 ),
 
                 const SizedBox(height: 35),
-
-                Row(
+Row(
                   mainAxisAlignment:
                       MainAxisAlignment.spaceEvenly,
                   children: [
 
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO Previous Bhajan
+                      },
                       icon: const Icon(
                         Icons.skip_previous,
                         size: 35,
@@ -234,15 +373,18 @@ body: SafeArea(
 
                     FloatingActionButton(
                       heroTag: "play",
-                      backgroundColor:
-                          Colors.orange,
+                      backgroundColor: Colors.orange,
                       elevation: 5,
                       onPressed: () async {
 
                         if (isPlaying) {
+
                           await _player.pause();
+
                         } else {
+
                           await _player.play();
+
                         }
 
                       },
@@ -255,7 +397,9 @@ body: SafeArea(
                     ),
 
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO Next Bhajan
+                      },
                       icon: const Icon(
                         Icons.skip_next,
                         size: 35,
@@ -277,20 +421,27 @@ body: SafeArea(
                     ),
 
                     IconButton(
-                      onPressed: () {},
+                      tooltip: "Repeat",
+                      onPressed: () {
+                        // TODO Repeat
+                      },
                       icon: const Icon(
                         Icons.repeat,
                       ),
                     ),
 
                     IconButton(
-                      onPressed: () {},
+                      tooltip: "Shuffle",
+                      onPressed: () {
+                        // TODO Shuffle
+                      },
                       icon: const Icon(
                         Icons.shuffle,
                       ),
                     ),
 
                     IconButton(
+                      tooltip: "Download",
                       onPressed: () {
                         // TODO Download
                       },
@@ -302,9 +453,9 @@ body: SafeArea(
                   ],
                 ),
 
-              ],
+                const SizedBox(height: 30),
 
-              const SizedBox(height: 30),
+              ],
 ],
           ),
         ),
@@ -314,6 +465,7 @@ body: SafeArea(
 
   @override
   void dispose() {
+    _player.stop();
     _player.dispose();
     super.dispose();
   }

@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
 import '../../widgets/category_card.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../../widgets/quick_action_card.dart';
 import '../../widgets/search_bar_widget.dart';
 import '../../widgets/section_title.dart';
+import '../../widgets/quick_action_card.dart';
+
 import '../bhajan/bhajan_screen.dart';
+import '../favorites/favorites_screen.dart';
+import '../recent/recently_played_screen.dart';
+import '../playlist/playlist_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -212,24 +216,35 @@ class HomeScreen extends StatelessWidget {
                   [
 
                     QuickActionCard(
-                      icon: Icons.favorite_rounded,
+                     icon: Icons.favorite_rounded,
                       title: "Favorites",
                       subtitle: "Your Bhajans",
                       color: Colors.red,
                       onTap: () {
-                        // TODO Favorites Screen
-                      },
-                    ),
+                     Navigator.push(
+                       context,
+                     MaterialPageRoute(
+                    builder: (_) => const FavoritesScreen(),
+                   ),
+                  );
+                  },
+                 ),
 
                     QuickActionCard(
-                      icon: Icons.history_rounded,
+                     icon: Icons.history,
                       title: "Recent",
-                      subtitle: "Recently Played",
-                      color: Colors.blue,
-                      onTap: () {
-                        // TODO Recent Screen
-                      },
-                    ),
+                       subtitle: "Recently Played",
+                    color: Colors.orange,
+                         onTap: () {
+                     Navigator.push(
+                       context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                           const RecentlyPlayedScreen(),
+      ),
+    );
+  },
+),
 
                     QuickActionCard(
                       icon: Icons.download_rounded,
@@ -242,12 +257,19 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                     QuickActionCard(
-                      icon: Icons.queue_music_rounded,
-                      title: "Playlist",
-                      subtitle: "Coming Soon",
-                      color: Colors.deepPurple,
-                      onTap: () {},
-                    ),
+  icon: Icons.queue_music,
+  title: "Playlist",
+  subtitle: "My Playlist",
+  color: Colors.green,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const PlaylistScreen(),
+      ),
+    );
+  },
+),
 
                   ],
                 ),
