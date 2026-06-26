@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/services/audio_service.dart';
 import '../../core/services/recent_service.dart';
 import '../../models/bhajan_model.dart';
-import '../../widgets/favorite_button.dart';
 import '../../widgets/add_to_playlist_sheet.dart';
+import '../../widgets/app_scaffold.dart';
+import '../../widgets/favorite_button.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final BhajanModel bhajan;
@@ -23,104 +25,20 @@ class AudioPlayerScreen extends StatefulWidget {
 class _AudioPlayerScreenState
     extends State<AudioPlayerScreen> {
 
-  final AudioPlayer _player = AudioPlayer();
-
-  bool isPlaying = false;
-  bool isLoading = true;
-
-  Duration duration = Duration.zero;
-  Duration position = Duration.zero;
+  late AudioService audio;
 
   @override
   void initState() {
     super.initState();
 
-    _loadAudio();
+    audio = AudioService.instance;
 
-    _player.playerStateStream.listen((state) {
-
-      if (!mounted) return;
-
-      setState(() {
-        isPlaying = state.playing;
-      });
-
-      if (state.processingState ==
-          ProcessingState.completed) {
-
-        _player.seek(Duration.zero);
-
-        setState(() {
-          isPlaying = false;
-        });
-
-      }
-    });
-
-    _player.durationStream.listen((d) {
-
-      if (!mounted) return;
-
-      setState(() {
-        duration = d ?? Duration.zero;
-      });
-
-    });
-
-    _player.positionStream.listen((p) {
-
-      if (!mounted) return;
-
-      setState(() {
-        position = p;
-      });
-
-    });
+    RecentService.addRecent(
+      widget.bhajan.id,
+    );
   }
 
-  Future<void> _loadAudio() async {
-
-    try {
-
-      await _player.setUrl(
-        widget.bhajan.audioUrl,
-      );
-
-      await RecentService.addRecent(
-        widget.bhajan.id,
-      );
-
-    } catch (e) {
-
-      debugPrint(e.toString());
-
-      if (mounted) {
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Audio Load Failed",
-            ),
-          ),
-        );
-
-      }
-
-    }
-
-    if (mounted) {
-
-      setState(() {
-
-        isLoading = false;
-
-      });
-
-    }
-
-  }
-String formatTime(Duration d) {
+  String formatTime(Duration d) {
 
     final hours = d.inHours;
 
@@ -137,336 +55,267 @@ String formatTime(Duration d) {
     }
 
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}";
-
   }
+@override
+Widget build(BuildContext context) {
 
-  @override
-  Widget build(BuildContext context) {
+  return Consumer<AudioService>(
 
-    return Scaffold(
+    builder: (context, audio, child) {
 
-      backgroundColor: const Color(0xffF8F8F8),
+      return AppScaffold(
 
-      appBar: AppBar(
+        backgroundColor: const Color(0xffF8F8F8),
 
-        centerTitle: true,
+        appBar: AppBar(
 
-        title: Text(
+          centerTitle: true,
 
-          widget.bhajan.title,
+          title: Text(
 
-          maxLines: 1,
+            widget.bhajan.title,
 
-          overflow: TextOverflow.ellipsis,
+            maxLines: 1,
 
-          style: GoogleFonts.poppins(
+            overflow: TextOverflow.ellipsis,
 
-            fontWeight: FontWeight.w600,
-
-          ),
-
-        ),
-
-        actions: [
-
-  FavoriteButton(
-    bhajanId: widget.bhajan.id,
-  ),
-
-  IconButton(
-    icon: const Icon(
-      Icons.playlist_add,
-    ),
-    onPressed: () {
-
-      showModalBottomSheet(
-
-        context: context,
-
-        isScrollControlled: true,
-
-        shape: const RoundedRectangleBorder(
-
-          borderRadius: BorderRadius.vertical(
-
-            top: Radius.circular(25),
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+            ),
 
           ),
 
-        ),
+          actions: [
 
-        builder: (_) => AddToPlaylistSheet(
+            FavoriteButton(
+              bhajanId: widget.bhajan.id,
+            ),
 
-          bhajanId: widget.bhajan.id,
-
-        ),
-
-      );
-
-    },
-  ),
-
-  IconButton(
-    onPressed: () {
-      // TODO Share
-    },
-    icon: const Icon(
-      Icons.share,
-    ),
-  ),
-
-],
-
-      ),
-
-      body: SafeArea(
-
-        child: SingleChildScrollView(
-
-          padding: const EdgeInsets.all(20),
-
-          child: Column(
-
-            children: [
-
-              const SizedBox(height: 20),
-
-              Container(
-
-                height: 260,
-
-                width: 260,
-
-                decoration: BoxDecoration(
-
-                  color: Colors.orange.shade100,
-
-                  borderRadius:
-                      BorderRadius.circular(24),
-
-                ),
-
-                child: const Icon(
-
-                  Icons.music_note,
-
-                  size: 120,
-
-                  color: Colors.deepOrange,
-
-                ),
-
+            IconButton(
+              icon: const Icon(
+                Icons.playlist_add,
               ),
+              onPressed: () {
 
-              const SizedBox(height: 30),
+                showModalBottomSheet(
 
-              Text(
+                  context: context,
 
-                widget.bhajan.title,
+                  isScrollControlled: true,
 
-                textAlign: TextAlign.center,
+                  shape: const RoundedRectangleBorder(
 
-                style: GoogleFonts.poppins(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(25),
+                    ),
 
-                  fontSize: 22,
-
-                  fontWeight: FontWeight.bold,
-
-                ),
-
-              ),
-
-              const SizedBox(height: 30),
-
-              if (isLoading)
-
-                const Padding(
-
-                  padding: EdgeInsets.symmetric(
-                    vertical: 20,
                   ),
 
-                  child:
-                      CircularProgressIndicator(),
+                  builder: (_) => AddToPlaylistSheet(
+                    bhajanId: widget.bhajan.id,
+                  ),
 
-                )
+                );
 
-              else ...[
+              },
+            ),
 
-                Slider(
+            IconButton(
+              onPressed: () {
+                // TODO Share
+              },
+              icon: const Icon(
+                Icons.share,
+              ),
+            ),
 
-                  value: position.inSeconds
-                      .toDouble()
-                      .clamp(
-                        0,
-                        duration.inSeconds
-                                    .toDouble() ==
-                                0
-                            ? 1
-                            : duration.inSeconds
-                                .toDouble(),
-                      ),
+          ],
 
-                  min: 0,
-
-                  max: duration.inSeconds
-                              .toDouble() ==
-                          0
-                      ? 1
-                      : duration.inSeconds
-                          .toDouble(),
-
-                  activeColor: Colors.orange,
-
-                  onChanged: (value) async {
-
-                    await _player.seek(
-
-                      Duration(
-                        seconds: value.toInt(),
-                      ),
-
-                    );
-
-                  },
-
-                ),
-
-                Row(
-
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
-
-                  children: [
-
-                    Text(
-                      formatTime(position),
-                      style:
-                          GoogleFonts.poppins(),
-                    ),
-
-                    Text(
-                      formatTime(duration),
-                      style:
-                          GoogleFonts.poppins(),
-                    ),
-
-                  ],
-
-                ),
-
-                const SizedBox(height: 35),
-Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly,
-                  children: [
-
-                    IconButton(
-                      onPressed: () {
-                        // TODO Previous Bhajan
-                      },
-                      icon: const Icon(
-                        Icons.skip_previous,
-                        size: 35,
-                      ),
-                    ),
-
-                    FloatingActionButton(
-                      heroTag: "play",
-                      backgroundColor: Colors.orange,
-                      elevation: 5,
-                      onPressed: () async {
-
-                        if (isPlaying) {
-
-                          await _player.pause();
-
-                        } else {
-
-                          await _player.play();
-
-                        }
-
-                      },
-                      child: Icon(
-                        isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        size: 40,
-                      ),
-                    ),
-
-                    IconButton(
-                      onPressed: () {
-                        // TODO Next Bhajan
-                      },
-                      icon: const Icon(
-                        Icons.skip_next,
-                        size: 35,
-                      ),
-                    ),
-
-                  ],
-                ),
-
-                const SizedBox(height: 35),
-
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly,
-                  children: [
-
-                    FavoriteButton(
-                      bhajanId: widget.bhajan.id,
-                    ),
-
-                    IconButton(
-                      tooltip: "Repeat",
-                      onPressed: () {
-                        // TODO Repeat
-                      },
-                      icon: const Icon(
-                        Icons.repeat,
-                      ),
-                    ),
-
-                    IconButton(
-                      tooltip: "Shuffle",
-                      onPressed: () {
-                        // TODO Shuffle
-                      },
-                      icon: const Icon(
-                        Icons.shuffle,
-                      ),
-                    ),
-
-                    IconButton(
-                      tooltip: "Download",
-                      onPressed: () {
-                        // TODO Download
-                      },
-                      icon: const Icon(
-                        Icons.download,
-                      ),
-                    ),
-
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-              ],
-],
-          ),
         ),
-      ),
-    );
-  }
+body: SafeArea(
 
-  @override
-  void dispose() {
-    _player.stop();
-    _player.dispose();
-    super.dispose();
-  }
+  child: SingleChildScrollView(
+
+    padding: const EdgeInsets.all(20),
+
+    child: Column(
+
+      children: [
+
+        const SizedBox(height: 20),
+
+        Container(
+
+          height: 260,
+          width: 260,
+
+          decoration: BoxDecoration(
+            color: Colors.orange.shade100,
+            borderRadius: BorderRadius.circular(24),
+          ),
+
+          child: const Icon(
+            Icons.music_note,
+            size: 120,
+            color: Colors.deepOrange,
+          ),
+
+        ),
+
+        const SizedBox(height: 30),
+
+        Text(
+
+          audio.currentBhajan?.title ??
+              widget.bhajan.title,
+
+          textAlign: TextAlign.center,
+
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+
+        ),
+
+        const SizedBox(height: 30),
+
+        Slider(
+
+          value: audio.position.inSeconds
+              .toDouble()
+              .clamp(
+                0,
+                audio.duration.inSeconds == 0
+                    ? 1
+                    : audio.duration.inSeconds
+                        .toDouble(),
+              ),
+
+          min: 0,
+
+          max: audio.duration.inSeconds == 0
+              ? 1
+              : audio.duration.inSeconds
+                  .toDouble(),
+
+          activeColor: Colors.orange,
+
+          onChanged: (value) async {
+
+            await audio.seek(
+
+              Duration(
+                seconds: value.toInt(),
+              ),
+
+            );
+
+          },
+
+        ),
+Row(
+  mainAxisAlignment:
+      MainAxisAlignment.spaceBetween,
+  children: [
+
+    Text(
+      formatTime(
+        audio.position,
+      ),
+      style: GoogleFonts.poppins(),
+    ),
+
+    Text(
+      formatTime(
+        audio.duration,
+      ),
+      style: GoogleFonts.poppins(),
+    ),
+
+  ],
+),
+
+const SizedBox(height: 35),
+
+Row(
+  mainAxisAlignment:
+      MainAxisAlignment.spaceEvenly,
+  children: [
+
+    IconButton(
+      onPressed: () async {
+        await audio.playPrevious();
+      },
+      icon: const Icon(
+        Icons.skip_previous,
+        size: 35,
+      ),
+    ),
+
+    FloatingActionButton(
+      heroTag: "play",
+      backgroundColor: Colors.orange,
+      elevation: 5,
+      onPressed: () async {
+        await audio.togglePlayPause();
+      },
+      child: Icon(
+        audio.isPlaying
+            ? Icons.pause
+            : Icons.play_arrow,
+        size: 40,
+      ),
+    ),
+
+    IconButton(
+      onPressed: () async {
+        await audio.playNext();
+      },
+      icon: const Icon(
+        Icons.skip_next,
+        size: 35,
+      ),
+    ),
+
+  ],
+),
+
+const SizedBox(height: 35),
+Row(
+  mainAxisAlignment:
+      MainAxisAlignment.spaceEvenly,
+  children: [
+
+    FavoriteButton(
+      bhajanId: widget.bhajan.id,
+    ),
+
+    IconButton(
+      tooltip: "Download",
+      onPressed: () {
+        // TODO Download
+      },
+      icon: const Icon(
+        Icons.download,
+      ),
+    ),
+
+  ],
+),
+
+const SizedBox(height: 30),
+
+],
+      ),
+    ),
+  ),
+);
+},
+  );
 }
+@override
+void dispose() {
+  super.dispose();
+}
+    }

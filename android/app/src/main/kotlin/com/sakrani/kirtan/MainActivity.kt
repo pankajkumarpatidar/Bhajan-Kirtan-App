@@ -1,4 +1,4 @@
-package com.example.kirtan_app
+package com.sakrani.kirtan
 
 import io.flutter.embedding.android.FlutterActivity
 

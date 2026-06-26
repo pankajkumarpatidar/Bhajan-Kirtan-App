@@ -5,6 +5,8 @@ import '../../models/bhajan_model.dart';
 import '../../repository/bhajan_repository.dart';
 import '../../widgets/favorite_button.dart';
 import '../lyrics/lyrics_screen.dart';
+import '../../widgets/app_scaffold.dart';
+import '../../core/services/audio_service.dart';
 
 class BhajanScreen extends StatelessWidget {
   final String categoryId;
@@ -18,7 +20,7 @@ class BhajanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       backgroundColor: const Color(0xffF8F8F8),
 
       appBar: AppBar(
@@ -105,16 +107,22 @@ class BhajanScreen extends StatelessWidget {
                   ),
 
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            LyricsScreen(
-                          bhajan: bhajan,
-                        ),
-                      ),
-                    );
-                  },
+
+  AudioService.instance.setPlaylist(
+    bhajans,
+    index,
+  );
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => LyricsScreen(
+        bhajan: bhajan,
+      ),
+    ),
+  );
+
+},
                 ),
               );
             },

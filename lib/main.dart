@@ -3,18 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'core/services/audio_service.dart';
 import 'core/services/bhajan_cache_service.dart';
 import 'core/services/favorite_service.dart';
+import 'core/services/playlist_service.dart';
 import 'core/services/recent_service.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'providers/category_provider.dart';
 import 'screens/home/home_screen.dart';
-import 'core/services/playlist_service.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+await JustAudioBackground.init(
+  androidNotificationChannelId:
+      'com.sakrani.kirtan.channel.audio',
+  androidNotificationChannelName:
+      'Kirtan Audio',
+  androidNotificationOngoing: true,
+);
   // Hive
   await Hive.initFlutter();
 
@@ -23,7 +31,7 @@ Future<void> main() async {
   await BhajanCacheService.init();
   await RecentService.init();
   await PlaylistService.init();
-  
+
   // Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -32,10 +40,25 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+
         ChangeNotifierProvider(
           create: (_) => CategoryProvider(),
         ),
+
+        ChangeNotifierProvider<AudioService>(
+          create: (_) {
+
+            final service = AudioService.instance;
+
+            service.initialize();
+
+            return service;
+
+          },
+        ),
+
       ],
+
       child: const KirtanApp(),
     ),
   );
@@ -46,7 +69,9 @@ class KirtanApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
+
       debugShowCheckedModeBanner: false,
 
       title: 'Kirtan App',
@@ -58,13 +83,21 @@ class KirtanApp extends StatelessWidget {
       home: const HomeScreen(),
 
       builder: (context, child) {
+
         return MediaQuery(
+
           data: MediaQuery.of(context).copyWith(
-            textScaler: const TextScaler.linear(1.0),
+            textScaler:
+                const TextScaler.linear(1.0),
           ),
+
           child: child!,
+
         );
+
       },
+
     );
+
   }
 }

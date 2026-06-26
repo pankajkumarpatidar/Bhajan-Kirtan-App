@@ -11,6 +11,7 @@ import '../bhajan/bhajan_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../recent/recently_played_screen.dart';
 import '../playlist/playlist_screen.dart';
+import '../../widgets/app_scaffold.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -78,7 +79,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return AppScaffold(
 
       drawer: const AppDrawer(),
 
@@ -437,116 +438,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
 
-      /// Future Mini Player
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(
-            16,
-            0,
-            16,
-            16,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: 0.08,
-                ),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius:
-                      BorderRadius.circular(16),
-                ),
-                child: const Icon(
-                  Icons.music_note_rounded,
-                  color: Colors.deepOrange,
-                  size: 30,
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              const Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-
-                    Text(
-                      "कोई भजन नहीं चल रहा",
-                      maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight:
-                            FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-
-                    SizedBox(height: 4),
-
-                    Text(
-                      "Play a bhajan to start listening",
-                      maxLines: 1,
-                      overflow:
-                          TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
-
-                  ],
-                ),
-              ),
-
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.skip_previous_rounded,
-                ),
-              ),
-
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.play_circle_fill_rounded,
-                  color: Colors.orange,
-                  size: 42,
-                ),
-              ),
-
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.skip_next_rounded,
-                ),
-              ),
-
-            ],
-          ),
-        ),
-      ),
+      
     );
   }
 }

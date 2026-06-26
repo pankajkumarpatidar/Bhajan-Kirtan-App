@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/services/playlist_service.dart';
 import '../../models/playlist_model.dart';
+import 'playlist_details_screen.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -347,12 +348,23 @@ if (value == "rename") {
 
                     ),
 
-                    onTap: () {
+                    onTap: () async {
 
-                      // TODO
-                      // Playlist Details Screen
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => PlaylistDetailsScreen(
+        playlistId: playlist.id,
+        playlistName: playlist.name,
+      ),
+    ),
+  );
 
-                    },
+  loadPlaylists();
+
+},
+
+
 
                   ),
 
