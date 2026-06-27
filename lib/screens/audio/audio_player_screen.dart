@@ -9,6 +9,7 @@ import '../../widgets/add_to_playlist_sheet.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/favorite_button.dart';
 
+
 class AudioPlayerScreen extends StatefulWidget {
   final BhajanModel bhajan;
 
@@ -291,16 +292,7 @@ Row(
       bhajanId: widget.bhajan.id,
     ),
 
-    IconButton(
-      tooltip: "Download",
-      onPressed: () {
-        // TODO Download
-      },
-      icon: const Icon(
-        Icons.download,
-      ),
-    ),
-
+    
   ],
 ),
 

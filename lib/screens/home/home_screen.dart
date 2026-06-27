@@ -1,22 +1,44 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
+import '../../core/services/audio_service.dart';
+import '../../models/bhajan_model.dart';
+import '../../repository/bhajan_repository.dart';
+
 import '../../widgets/app_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 import '../../widgets/category_card.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/quick_action_card.dart';
 import '../../widgets/search_bar_widget.dart';
 import '../../widgets/section_title.dart';
-import '../../widgets/quick_action_card.dart';
 
 import '../bhajan/bhajan_screen.dart';
 import '../favorites/favorites_screen.dart';
-import '../recent/recently_played_screen.dart';
 import '../playlist/playlist_screen.dart';
-import '../../widgets/app_scaffold.dart';
+import '../recent/recently_played_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    super.key,
+  });
 
-  static const List<Map<String, dynamic>> categories = [
+  @override
+  State<HomeScreen> createState() =>
+      _HomeScreenState();
+}
+
+class _HomeScreenState
+    extends State<HomeScreen> {
+
+  BhajanModel? todaysBhajan;
+
+  bool loadingToday = true;
+
+  List<BhajanModel> allBhajans = [];
+
+  static const List<Map<String, dynamic>>
+      categories = [
 
     {
       "id": "radha_krishna",
@@ -77,128 +99,224 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    loadTodayBhajan();
+  }
+  Future<void> loadTodayBhajan() async {
+
+    final repository = BhajanRepository();
+
+    allBhajans =
+        await repository.getAllBhajans();
+
+    if (allBhajans.isEmpty) {
+
+      if (mounted) {
+
+        setState(() {
+          loadingToday = false;
+        });
+
+      }
+
+      return;
+
+    }
+
+    final today = DateTime.now();
+
+    final random = Random(
+      today.year +
+          today.month +
+          today.day,
+    );
+
+    todaysBhajan = allBhajans[
+        random.nextInt(
+      allBhajans.length,
+    )];
+
+    if (mounted) {
+
+      setState(() {
+        loadingToday = false;
+      });
+
+    }
+
+  }
+
+  Future<void> playTodayBhajan() async {
+
+    if (todaysBhajan == null) {
+      return;
+    }
+
+    final index = allBhajans.indexWhere(
+      (e) => e.id == todaysBhajan!.id,
+    );
+
+    AudioService.instance.setPlaylist(
+      allBhajans,
+      index < 0 ? 0 : index,
+    );
+
+    await AudioService.instance.playBhajan(
+      todaysBhajan!,
+    );
+
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     return AppScaffold(
 
       drawer: const AppDrawer(),
 
-      backgroundColor: const Color(0xffF7F8FC),
+      backgroundColor: Colors.white,
 
       body: SafeArea(
 
         child: CustomScrollView(
 
-          physics: const BouncingScrollPhysics(),
+          physics:
+              const BouncingScrollPhysics(),
 
           slivers: [
-/// Premium App Bar
+            /// Premium App Bar
             const SliverToBoxAdapter(
               child: CustomAppBar(),
             ),
 
-            /// Search
+            /// Search Bar
             const SliverToBoxAdapter(
               child: SearchBarWidget(),
             ),
 
             const SliverToBoxAdapter(
-              child: SizedBox(height: 20),
+              child: SizedBox(height: 22),
             ),
 
-            /// Featured Banner
+            /// Today's Featured Bhajan
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
                 child: Container(
-                  height: 210, // Overflow Fixed
+                  height: 195,
                   width: double.infinity,
-
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius:
+                        BorderRadius.circular(26),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xffFF9800),
-                        Color(0xffFF6F00),
+                        Color(0xffFFB74D),
+                        Color(0xffFB8C00),
                       ],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.orange.withValues(alpha: 0.35),
-                        blurRadius: 22,
-                        offset: const Offset(0, 10),
+                        color: Colors.orange.withValues(
+                          alpha: 0.18,
+                        ),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-
                   child: Padding(
                     padding: const EdgeInsets.all(22),
+                    child: loadingToday
+                        ? const Center(
+                            child:
+                                CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
 
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceEvenly,
+                              Row(
+                                children: [
 
-                      children: [
+                                  const Icon(
+                                    Icons.auto_awesome,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
 
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 34,
-                        ),
+                                  const SizedBox(width: 8),
 
-                        const Text(
-                          "🌸 आज का विशेष भजन",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                                  Text(
+                                    "आज का विशेष भजन",
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.95,
+                                      ),
+                                      fontSize: 15,
+                                      fontWeight:
+                                          FontWeight.w600,
+                                    ),
+                                  ),
 
-                        const Text(
-                          "राधे राधे जपो चले आएंगे बिहारी",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FilledButton.icon(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.orange,
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 12,
+                                ],
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(14),
-                              ),
-                            ),
-                            onPressed: () {
-                              // TODO Today's Bhajan
-                            },
-                            icon: const Icon(
-                              Icons.play_arrow_rounded,
-                            ),
-                            label: const Text(
-                              "अभी सुनें",
-                            ),
-                          ),
-                        ),
 
-                      ],
-                    ),
+                              Text(
+                                todaysBhajan?.title ??
+                                    "भजन उपलब्ध नहीं",
+                                maxLines: 2,
+                                overflow:
+                                    TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight:
+                                      FontWeight.bold,
+                                  height: 1.25,
+                                ),
+                              ),
+
+                              const Text(
+                                "भक्ति में मन को शांति मिले",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                              ),
+
+                              Align(
+  alignment: Alignment.centerLeft,
+  child: FilledButton.icon(
+    onPressed: loadingToday ? null : playTodayBhajan,
+    icon: const Icon(Icons.play_arrow_rounded),
+    label: const Text("अभी सुनें"),
+    style: FilledButton.styleFrom(
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xffFB8C00),
+      elevation: 0,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 12,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+    ),
+  ),
+),
+                            ],
+                          ),
                   ),
                 ),
               ),
@@ -207,7 +325,8 @@ class HomeScreen extends StatelessWidget {
             const SliverToBoxAdapter(
               child: SizedBox(height: 28),
             ),
-/// Quick Actions
+
+            /// Quick Actions
             SliverPadding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
@@ -217,173 +336,213 @@ class HomeScreen extends StatelessWidget {
                   [
 
                     QuickActionCard(
-                     icon: Icons.favorite_rounded,
-                      title: "Favorites",
+                      icon: Icons.favorite_rounded,
+                      title: "Favorite",
                       subtitle: "Your Bhajans",
-                      color: Colors.red,
+                      color: Colors.redAccent,
                       onTap: () {
-                     Navigator.push(
-                       context,
-                     MaterialPageRoute(
-                    builder: (_) => const FavoritesScreen(),
-                   ),
-                  );
-                  },
-                 ),
-
-                    QuickActionCard(
-                     icon: Icons.history,
-                      title: "Recent",
-                       subtitle: "Recently Played",
-                    color: Colors.orange,
-                         onTap: () {
-                     Navigator.push(
-                       context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                           const RecentlyPlayedScreen(),
-      ),
-    );
-  },
-),
-
-                    QuickActionCard(
-                      icon: Icons.download_rounded,
-                      title: "Downloads",
-                      subtitle: "Offline Music",
-                      color: Colors.green,
-                      onTap: () {
-                        // TODO Downloads Screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const FavoritesScreen(),
+                          ),
+                        );
                       },
                     ),
 
                     QuickActionCard(
-  icon: Icons.queue_music,
-  title: "Playlist",
-  subtitle: "My Playlist",
-  color: Colors.green,
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const PlaylistScreen(),
-      ),
-    );
-  },
-),
+                      icon: Icons.history_rounded,
+                      title: "Recent",
+                      subtitle: "History",
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const RecentlyPlayedScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    QuickActionCard(
+                      icon: Icons.queue_music_rounded,
+                      title: "Playlist",
+                      subtitle: "My Playlist",
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const PlaylistScreen(),
+                          ),
+                        );
+                      },
+                    ),
 
                   ],
+                ),
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.92,
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 34),
+            ),
+            /// Categories Title
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+
+                    const SectionTitle(
+                      title: "भजन श्रेणियाँ",
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Container(
+                      width: 28,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFB8C00),
+                        borderRadius:
+                            BorderRadius.circular(50),
+                      ),
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 22),
+            ),
+
+            /// Categories Grid
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
+              sliver: SliverGrid(
+                delegate:
+                    SliverChildBuilderDelegate(
+                  (context, index) {
+
+                    final category =
+                        categories[index];
+
+                    return TweenAnimationBuilder<double>(
+                      duration: Duration(
+                        milliseconds:
+                            180 + (index * 50),
+                      ),
+                      tween: Tween(
+                        begin: 0.97,
+                        end: 1,
+                      ),
+                      curve: Curves.easeOut,
+                      builder: (
+                        context,
+                        value,
+                        child,
+                      ) {
+
+                        return Transform.scale(
+                          scale: value,
+                          child: child,
+                        );
+
+                      },
+                      child: CategoryCard(
+                        title:
+                            category["title"]
+                                as String,
+                        image:
+                            category["image"]
+                                as String,
+                        color:
+                            category["color"]
+                                as Color,
+                        onTap: () {
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  BhajanScreen(
+                                categoryId:
+                                    category["id"]
+                                        as String,
+                                categoryName:
+                                    category["title"]
+                                        as String,
+                              ),
+                            ),
+                          );
+
+                        },
+                      ),
+                    );
+
+                  },
+                  childCount:
+                      categories.length,
                 ),
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.18,
+                  childAspectRatio: 0.88,
                 ),
               ),
             ),
 
             const SliverToBoxAdapter(
-              child: SizedBox(height: 30),
+              child: SizedBox(height: 50),
             ),
-
-            const SliverToBoxAdapter(
-              child: SectionTitle(
-                title: "भजन श्रेणियाँ",
-              ),
-            ),
-
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 18),
-            ),
-/// Categories Grid
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final category = categories[index];
-
-                    return TweenAnimationBuilder<double>(
-                      duration: Duration(
-                        milliseconds: 250 + (index * 100),
-                      ),
-                      tween: Tween(
-                        begin: 0,
-                        end: 1,
-                      ),
-                      curve: Curves.easeOutBack,
-                      builder: (
-                        context,
-                        value,
-                        child,
-                      ) {
-                        return Transform.scale(
-                          scale: value,
-                          child: Opacity(
-                            opacity: value,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: CategoryCard(
-                        title: category["title"] as String,
-                        image: category["image"] as String,
-                        color: category["color"] as Color,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => BhajanScreen(
-                                categoryId:
-                                    category["id"] as String,
-                                categoryName:
-                                    category["title"] as String,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  childCount: categories.length,
-                ),
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 18,
-                  mainAxisSpacing: 18,
-                  childAspectRatio: 0.90,
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 35),
-            ),
-
             /// Footer
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 40,
                 ),
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 22,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
-                        BorderRadius.circular(24),
+                        BorderRadius.circular(22),
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(
-                          alpha: 0.05,
+                          alpha: 0.04,
                         ),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -392,7 +551,7 @@ class HomeScreen extends StatelessWidget {
 
                       Icon(
                         Icons.music_note_rounded,
-                        size: 42,
+                        size: 34,
                         color: Colors.orange.shade700,
                       ),
 
@@ -401,27 +560,19 @@ class HomeScreen extends StatelessWidget {
                       const Text(
                         "Kirtan App",
                         style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff212121),
                         ),
                       ),
 
-                      const SizedBox(height: 6),
-
-                      Text(
-                        "Listen • Read • Download",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
 
                       Text(
                         "Version 1.0.0",
                         style: TextStyle(
-                          color: Colors.grey.shade500,
                           fontSize: 12,
+                          color: Colors.grey.shade600,
                         ),
                       ),
 
@@ -432,13 +583,12 @@ class HomeScreen extends StatelessWidget {
             ),
 
             const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
+              child: SizedBox(height: 90),
             ),
-],
+
+          ],
         ),
       ),
-
-      
     );
   }
 }

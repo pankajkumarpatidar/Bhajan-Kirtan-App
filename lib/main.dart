@@ -12,17 +12,11 @@ import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'providers/category_provider.dart';
 import 'screens/home/home_screen.dart';
-import 'package:just_audio_background/just_audio_background.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-await JustAudioBackground.init(
-  androidNotificationChannelId:
-      'com.sakrani.kirtan.channel.audio',
-  androidNotificationChannelName:
-      'Kirtan Audio',
-  androidNotificationOngoing: true,
-);
+
   // Hive
   await Hive.initFlutter();
 
@@ -31,7 +25,7 @@ await JustAudioBackground.init(
   await BhajanCacheService.init();
   await RecentService.init();
   await PlaylistService.init();
-
+ 
   // Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -56,8 +50,9 @@ await JustAudioBackground.init(
 
           },
         ),
-
+         
       ],
+      
 
       child: const KirtanApp(),
     ),
