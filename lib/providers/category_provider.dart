@@ -7,7 +7,8 @@ import '../repository/category_repository.dart';
 
 class CategoryProvider extends ChangeNotifier {
 
-  final CategoryRepository _repository = CategoryRepository();
+  final CategoryRepository _repository =
+      CategoryRepository.instance;
 
   List<CategoryModel> _categories = [];
 
@@ -15,9 +16,11 @@ class CategoryProvider extends ChangeNotifier {
 
   String _error = '';
 
-  StreamSubscription? _subscription;
+  StreamSubscription<List<CategoryModel>>?
+      _subscription;
 
-  List<CategoryModel> get categories => _categories;
+  List<CategoryModel> get categories =>
+      _categories;
 
   bool get loading => _loading;
 
@@ -31,13 +34,16 @@ class CategoryProvider extends ChangeNotifier {
 
     notifyListeners();
 
-    _subscription = _repository.getCategories().listen(
+    _subscription =
+        _repository.getAllCategories().listen(
 
       (data) {
 
         _categories = data;
 
         _loading = false;
+
+        _error = '';
 
         notifyListeners();
 
@@ -54,6 +60,89 @@ class CategoryProvider extends ChangeNotifier {
       },
 
     );
+
+  }
+  Future<void> refresh() async {
+
+    startListening();
+
+  }
+
+  Future<void> addCategory({
+
+    required CategoryModel category,
+
+  }) async {
+
+    await _repository.addCategory(
+      category: category,
+    );
+
+  }
+
+  Future<void> updateCategory({
+
+    required CategoryModel category,
+
+  }) async {
+
+    await _repository.updateCategory(
+      category: category,
+    );
+
+  }
+
+  Future<void> deleteCategory(
+
+    String id,
+
+  ) async {
+
+    await _repository.deleteCategory(
+      id,
+    );
+
+  }
+
+  Future<CategoryModel?> getCategory(
+
+    String id,
+
+  ) async {
+
+    return await _repository.getById(
+      id,
+    );
+
+  }
+
+  Future<int> getNextOrder() async {
+
+    return await _repository.getNextOrder();
+
+  }
+
+  Future<bool> categoryExists(
+
+    String id,
+
+  ) async {
+
+    return await _repository.categoryExists(
+      id,
+    );
+
+  }
+  void clear() {
+
+    _categories.clear();
+
+    _error = '';
+
+    _loading = false;
+
+    notifyListeners();
+
   }
 
   @override
@@ -64,4 +153,5 @@ class CategoryProvider extends ChangeNotifier {
     super.dispose();
 
   }
+
 }

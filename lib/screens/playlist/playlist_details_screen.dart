@@ -5,6 +5,7 @@ import '../../core/services/playlist_service.dart';
 import '../../models/bhajan_model.dart';
 import '../../repository/bhajan_repository.dart';
 import '../audio/audio_player_screen.dart';
+import '../../core/services/audio_service.dart';
 
 class PlaylistDetailsScreen extends StatefulWidget {
 
@@ -27,7 +28,7 @@ class _PlaylistDetailsScreenState
     extends State<PlaylistDetailsScreen> {
 
   final BhajanRepository repository =
-      BhajanRepository();
+      BhajanRepository.instance;
 
   List<BhajanModel> bhajans = [];
 
@@ -154,19 +155,29 @@ class _PlaylistDetailsScreenState
                             child: ElevatedButton.icon(
 
                               onPressed: bhajans.isEmpty
-                                  ? null
-                                  : () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              AudioPlayerScreen(
-                                            bhajan:
-                                                bhajans.first,
-                                          ),
-                                        ),
-                                      );
-                                    },
+    ? null
+    : () async {
+
+        AudioService.instance.setPlaylist(
+          bhajans,
+          0,
+        );
+
+        await AudioService.instance.playBhajan(
+          bhajans.first,
+        );
+
+        if (!context.mounted) return;
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AudioPlayerScreen(
+              bhajan: bhajans.first,
+            ),
+          ),
+        );
+      },
 
                               icon: const Icon(
                                 Icons.play_arrow,

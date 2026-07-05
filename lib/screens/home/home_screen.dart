@@ -17,6 +17,7 @@ import '../bhajan/bhajan_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../playlist/playlist_screen.dart';
 import '../recent/recently_played_screen.dart';
+import '../audio/audio_player_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -96,6 +97,20 @@ class _HomeScreenState
       "color": Color(0xff00897B),
     },
 
+    {
+      "id": "manbhavan_kirtan",
+      "title": "मनभावन कीर्तन",
+      "image": "manbhavan.png",
+      "color": Color.fromARGB(255, 24, 197, 219),
+    },
+
+    {
+      "id": "sanwaliya_seth",
+      "title": "सांवलिया सेठ",
+      "image": "sanwliya.png",
+      "color": Color.fromARGB(255, 224, 24, 181),
+    },
+
   ];
 
   @override
@@ -106,7 +121,7 @@ class _HomeScreenState
   }
   Future<void> loadTodayBhajan() async {
 
-    final repository = BhajanRepository();
+    final repository = BhajanRepository.instance;
 
     allBhajans =
         await repository.getAllBhajans();
@@ -150,24 +165,33 @@ class _HomeScreenState
 
   Future<void> playTodayBhajan() async {
 
-    if (todaysBhajan == null) {
-      return;
-    }
+  if (todaysBhajan == null) return;
 
-    final index = allBhajans.indexWhere(
-      (e) => e.id == todaysBhajan!.id,
-    );
+  final index = allBhajans.indexWhere(
+    (e) => e.id == todaysBhajan!.id,
+  );
 
-    AudioService.instance.setPlaylist(
-      allBhajans,
-      index < 0 ? 0 : index,
-    );
+  AudioService.instance.setPlaylist(
+    allBhajans,
+    index < 0 ? 0 : index,
+  );
 
-    await AudioService.instance.playBhajan(
-      todaysBhajan!,
-    );
+  await AudioService.instance.playBhajan(
+    todaysBhajan!,
+  );
 
-  }
+  if (!mounted) return;
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => AudioPlayerScreen(
+        bhajan: todaysBhajan!,
+      ),
+    ),
+  );
+
+}
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +362,7 @@ class _HomeScreenState
                     QuickActionCard(
                       icon: Icons.favorite_rounded,
                       title: "Favorite",
-                      subtitle: "Your Bhajans",
+                      subtitle: "",
                       color: Colors.redAccent,
                       onTap: () {
                         Navigator.push(
@@ -354,7 +378,7 @@ class _HomeScreenState
                     QuickActionCard(
                       icon: Icons.history_rounded,
                       title: "Recent",
-                      subtitle: "History",
+                      subtitle: "",
                       color: Colors.orange,
                       onTap: () {
                         Navigator.push(
@@ -370,7 +394,7 @@ class _HomeScreenState
                     QuickActionCard(
                       icon: Icons.queue_music_rounded,
                       title: "Playlist",
-                      subtitle: "My Playlist",
+                      subtitle: "",
                       color: Colors.green,
                       onTap: () {
                         Navigator.push(
@@ -569,7 +593,7 @@ class _HomeScreenState
                       const SizedBox(height: 4),
 
                       Text(
-                        "Version 1.0.0",
+                        "Developed by Pankaj Patidar- 9340066006",
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,

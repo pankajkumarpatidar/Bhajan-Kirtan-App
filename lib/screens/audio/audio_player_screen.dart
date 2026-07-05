@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/services/audio_service.dart';
 import '../../core/services/recent_service.dart';
@@ -35,8 +36,9 @@ class _AudioPlayerScreenState
     audio = AudioService.instance;
 
     RecentService.addRecent(
+  AudioService.instance.currentBhajan?.id ??
       widget.bhajan.id,
-    );
+);
   }
 
   String formatTime(Duration d) {
@@ -65,6 +67,7 @@ Widget build(BuildContext context) {
     builder: (context, audio, child) {
 
       return AppScaffold(
+        showMiniPlayer: false,
 
         backgroundColor: const Color(0xffF8F8F8),
 
@@ -73,24 +76,21 @@ Widget build(BuildContext context) {
           centerTitle: true,
 
           title: Text(
-
-            widget.bhajan.title,
-
-            maxLines: 1,
-
-            overflow: TextOverflow.ellipsis,
-
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-            ),
-
-          ),
+  audio.currentBhajan?.title ??
+      widget.bhajan.title,
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+  style: GoogleFonts.poppins(
+    fontWeight: FontWeight.w600,
+  ),
+),
 
           actions: [
 
             FavoriteButton(
-              bhajanId: widget.bhajan.id,
-            ),
+  bhajanId: audio.currentBhajan?.id ??
+      widget.bhajan.id,
+),
 
             IconButton(
               icon: const Icon(
@@ -113,22 +113,17 @@ Widget build(BuildContext context) {
                   ),
 
                   builder: (_) => AddToPlaylistSheet(
-                    bhajanId: widget.bhajan.id,
-                  ),
+  bhajanId:
+      audio.currentBhajan?.id ??
+      widget.bhajan.id,
+),
 
                 );
 
               },
             ),
 
-            IconButton(
-              onPressed: () {
-                // TODO Share
-              },
-              icon: const Icon(
-                Icons.share,
-              ),
-            ),
+            
 
           ],
 
@@ -151,7 +146,7 @@ body: SafeArea(
           width: 260,
 
           decoration: BoxDecoration(
-            color: Colors.orange.shade100,
+            color: const Color.fromARGB(255, 255, 154, 2),
             borderRadius: BorderRadius.circular(24),
           ),
 
@@ -287,10 +282,86 @@ Row(
   mainAxisAlignment:
       MainAxisAlignment.spaceEvenly,
   children: [
+Row(
+  children: [
 
-    FavoriteButton(
-      bhajanId: widget.bhajan.id,
+    Expanded(
+      child: ElevatedButton.icon(
+
+        onPressed: () async {
+
+          final uri = Uri.parse(
+            "https://instagram.com/sakrani_kirtan",
+          );
+
+          await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+
+        },
+
+        icon: const Icon(Icons.camera_alt),
+
+        label: const Text("Instagram"),
+
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xffE1306C),
+          foregroundColor: Colors.white,
+          minimumSize: const Size(
+            double.infinity,
+            55,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(16),
+          ),
+        ),
+
+      ),
     ),
+
+    const SizedBox(width: 15),
+
+    Expanded(
+      child: ElevatedButton.icon(
+
+        onPressed: () async {
+
+          final uri = Uri.parse(
+            "https://wa.me/919340066006?text=Jay%20Shree%20Ram 🙏",
+          );
+
+          await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+
+        },
+
+        icon: const Icon(Icons.chat),
+
+        label: const Text("WhatsApp"),
+
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xff25D366),
+          foregroundColor: Colors.white,
+          minimumSize: const Size(
+            double.infinity,
+            55,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(16),
+          ),
+        ),
+
+      ),
+    ),
+
+  ],
+),
+    
 
     
   ],
@@ -311,3 +382,4 @@ void dispose() {
   super.dispose();
 }
     }
+    

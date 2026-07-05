@@ -12,6 +12,8 @@ class AppScaffold extends StatelessWidget {
 
   final Widget? floatingActionButton;
 
+  final bool showMiniPlayer;
+
   final FloatingActionButtonLocation?
       floatingActionButtonLocation;
 
@@ -23,6 +25,7 @@ class AppScaffold extends StatelessWidget {
     required this.body,
     this.drawer,
     this.floatingActionButton,
+    this.showMiniPlayer = true,
     this.floatingActionButtonLocation,
     this.backgroundColor,
   });
@@ -53,7 +56,9 @@ class AppScaffold extends StatelessWidget {
             child: body,
           ),
 
-          const MiniPlayer(),
+          showMiniPlayer
+    ? const MiniPlayer()
+    : const SizedBox(),
 
         ],
 

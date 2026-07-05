@@ -34,7 +34,7 @@ class CategoryScreen extends StatelessWidget {
       ),
 
       body: StreamBuilder<List<BhajanModel>>(
-        stream: BhajanRepository().getBhajans(categoryId),
+        stream: BhajanRepository.instance.getBhajans(categoryId),
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {

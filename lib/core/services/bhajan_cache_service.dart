@@ -65,6 +65,7 @@ class BhajanCacheService {
             duration:
                 data["duration"] ?? "",
             status: data["status"] ?? true,
+            createdBy: data["createdBy"] ?? "",
           );
         })
         .toList();

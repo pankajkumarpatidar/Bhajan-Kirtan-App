@@ -22,13 +22,13 @@ class MiniPlayer extends StatelessWidget {
             onTap: () {
 
   Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => AudioPlayerScreen(
-        bhajan: audio.currentBhajan!,
-      ),
+  context,
+  MaterialPageRoute(
+    builder: (_) => AudioPlayerScreen(
+      bhajan: audio.currentBhajan!,
     ),
-  );
+  ),
+);
 
 },
             child: SafeArea(

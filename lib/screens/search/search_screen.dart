@@ -33,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> loadBhajans() async {
-  final repository = BhajanRepository();
+  final repository = BhajanRepository.instance;
 
   allBhajans =
       await repository.getAllBhajans();

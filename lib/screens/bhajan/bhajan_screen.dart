@@ -34,7 +34,7 @@ class BhajanScreen extends StatelessWidget {
       ),
 
       body: StreamBuilder<List<BhajanModel>>(
-        stream: BhajanRepository().getBhajans(categoryId),
+        stream: BhajanRepository.instance.getBhajans(categoryId),
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
@@ -62,7 +62,7 @@ class BhajanScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: bhajans.length,
-            separatorBuilder: (_, __) =>
+            separatorBuilder: (context, index) =>
                 const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final bhajan = bhajans[index];

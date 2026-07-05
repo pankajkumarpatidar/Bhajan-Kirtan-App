@@ -19,7 +19,7 @@ class _RecentlyPlayedScreenState
     extends State<RecentlyPlayedScreen> {
 
   final BhajanRepository repository =
-      BhajanRepository();
+      BhajanRepository.instance;
 
   final TextEditingController
       searchController =
