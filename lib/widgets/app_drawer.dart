@@ -10,6 +10,8 @@ import '../screens/admin/login_screen.dart';
 import '../screens/favorites/favorites_screen.dart';
 import '../screens/playlist/playlist_screen.dart';
 import '../screens/recent/recently_played_screen.dart';
+import '../screens/about/about_screen.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({
@@ -125,7 +127,7 @@ class AppDrawer extends StatelessWidget {
 
                   Text(
 
-                    "सकरानी जागीर द्वारा संचालित",
+                    "श्री बालाजी सुंदरकाण्ड मित्र मण्डल,सकरानी जागीर द्वारा संचालित",
 
                     style: GoogleFonts.poppins(
 
@@ -267,28 +269,43 @@ class AppDrawer extends StatelessWidget {
 
                   const Divider(),
                   menuTile(
-                    icon: Icons.share,
-                    title: "Share App",
-                    onTap: () {
-                      // Next Step
-                    },
-                  ),
+  icon: Icons.share,
+  title: "Share App",
+  onTap: () {
+
+    Navigator.pop(context);
+
+    SharePlus.instance.share(
+      ShareParams(
+        text:
+            "🙏 Kirtan App\n\n"
+            "भजन, कीर्तन, आरती, सुंदरकाण्ड और अन्य आध्यात्मिक सामग्री का सुंदर संग्रह।\n\n"
+            "डाउनलोड करें:\n"
+            "https://drive.google.com/uc?export=download&id=107QieeTczawM9ZktFUZ4lrYAQjdTY4Pv\n\n"
+            "🙏 जय श्री राम 🙏",
+      ),
+    );
+
+  },
+),
+
 
                   menuTile(
-                    icon: Icons.settings,
-                    title: "Settings",
-                    onTap: () {
-                      // Next Step
-                    },
-                  ),
+  icon: Icons.info_outline,
+  title: "About",
+  onTap: () {
 
-                  menuTile(
-                    icon: Icons.info_outline,
-                    title: "About",
-                    onTap: () {
-                      // Next Step
-                    },
-                  ),
+    Navigator.pop(context);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AboutScreen(),
+      ),
+    );
+
+  },
+),
 
                 ],
               ),
